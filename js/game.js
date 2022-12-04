@@ -397,8 +397,7 @@ const update = (dt) => {
       // collision against blocks
       blocks.forEach((block) => {
         if (collisionDetected(turret.heart, block) && i_frames < 1) {
-          // game_state = "game_over";
-          // GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(turret), 1);
+          // particle effect and screen shake on turret destruction
           poof(
             turret.x + turret.w / 2,
             turret.y + turret.h - turret.h / 4,
@@ -406,8 +405,15 @@ const update = (dt) => {
             1,
             false
           );
+          screenshakesRemaining = HIT_SCREENSHAKES;
+
+          // remove block that hit the player
           GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(block), 1);
+
+          // split the player into smaller turrets
           split(turret);
+
+          // give the player a span of invincibility frames
           i_frames = invincibility_duration;
         }
       });
