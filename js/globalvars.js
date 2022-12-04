@@ -17,3 +17,5 @@ var spawn_rate = 50;
 var spawn_timer = 0;
 var spawn_limit = 6;
 var score = 0;
+var i_frames = 0;
+var invincibility_duration = 10;

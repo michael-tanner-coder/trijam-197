@@ -24,7 +24,7 @@ const PADDING = 4;
 
 // OBJECTS
 const PLAYER = {
-  x: GAME_W / 2,
+  x: GAME_W / 2 - 16,
   y: GAME_H - 32,
   dx: 0,
   w: 32,
@@ -354,6 +354,15 @@ const update = (dt) => {
     return;
   }
   if (game_state === STATES.in_game) {
+    // invincibility frames
+    if (i_frames > 0) {
+      i_frames -= 1;
+    }
+
+    if (i_frames <= 0) {
+      i_frames = 0;
+    }
+
     // player group
     turrets.forEach((turret) => {
       // PLAYER MOVEMENT
@@ -387,7 +396,7 @@ const update = (dt) => {
 
       // collision against blocks
       blocks.forEach((block) => {
-        if (collisionDetected(turret.heart, block)) {
+        if (collisionDetected(turret.heart, block) && i_frames < 1) {
           // game_state = "game_over";
           // GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(turret), 1);
           poof(
@@ -399,6 +408,7 @@ const update = (dt) => {
           );
           GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(block), 1);
           split(turret);
+          i_frames = invincibility_duration;
         }
       });
     });
@@ -485,6 +495,11 @@ const draw = () => {
     context.fillRect(obj.x, obj.y, obj.w, obj.h);
 
     if (obj.type === "turret") {
+      // i frame flash
+      if (i_frames > 0) {
+        obj.color = i_frames % 2 === 0 ? "white" : ORANGE;
+      }
+
       // gun
       context.fillStyle = obj.cannon.color;
       context.fillRect(
