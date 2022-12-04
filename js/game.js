@@ -1,7 +1,4 @@
 // GAME CONCEPT: Space Invaders meets Asteriods! Shoot at falling blocks to split them into tinier blocks. Avoid them and keep shooting to score points.
-// TODO: hurt player when hitting a block
-// TODO: game over + reset + show score
-// TODO: lead-in startup timer
 // TODO: nice to have: start menu
 // TODO: nice to have: custom controls
 // TODO: nice to have: smooth vfx (screenshake, trails, particles)
@@ -16,7 +13,7 @@ const STATES = {
   in_game: "in_game",
   menu: "menu",
 };
-var game_state = "in_game";
+var game_state = "start";
 
 // GRID PROPS
 const BRICK_W = 32;
@@ -311,10 +308,12 @@ window.addEventListener("keyup", function (e) {
 const resetGame = () => {
   GAME_OBJECTS.length = 0;
 
-  GAME_OBJECTS = [];
+  let player = JSON.parse(JSON.stringify(PLAYER));
+  GAME_OBJECTS = [player];
 
   game_state = STATES.start;
   start_timer = 4;
+  score = 0;
 };
 
 // LOOP
@@ -486,6 +485,14 @@ const draw = () => {
     let game_over_text = "GAME OVER!";
     let game_over_w = context.measureText(game_over_text).width;
     context.fillText(game_over_text, GAME_W / 2 - game_over_w / 2, GAME_H / 2);
+
+    let score_text = "SCORE:" + score;
+    let score_text_w = context.measureText(score_text).width;
+    context.fillText(
+      score_text,
+      GAME_W / 2 - score_text_w / 2,
+      GAME_H / 2 + 16
+    );
   }
 
   if (game_state === STATES.menu) {
