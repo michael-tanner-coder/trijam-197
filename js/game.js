@@ -65,7 +65,7 @@ const BLOCK = {
   x: GAME_W / 2,
   y: 50,
   dx: 0,
-  dy: 0,
+  dy: 1,
   prev_x: 0,
   prev_y: 0,
   w: BRICK_W,
@@ -77,12 +77,8 @@ const BLOCK = {
 };
 
 // PLAYERS
-const PLAYER_1 = JSON.parse(JSON.stringify(PLAYER));
-PLAYER_1.tag = "player1";
-
-PLAYER_1.y = 100;
-
-PLAYER_1.x = GAME_W / 2 - PLAYER_1.w / 2;
+let player = JSON.parse(JSON.stringify(PLAYER));
+let GAME_OBJECTS = [player];
 
 // UTILS
 const shoot = (shooter, projectile) => {
@@ -90,6 +86,13 @@ const shoot = (shooter, projectile) => {
   new_shot.x = shooter.x + shooter.w / 2 - projectile.w / 2;
   new_shot.y = shooter.y - shooter.h;
   GAME_OBJECTS.push(new_shot);
+};
+
+const spawnBlock = () => {
+  let new_block = JSON.parse(JSON.stringify(BLOCK));
+  new_block.x = Math.floor(Math.random() * GAME_W);
+  new_block.y = 0;
+  GAME_OBJECTS.push(new_block);
 };
 
 const genGrid = (brick, rows, cols, start_x = 0, start_y = 0) => {
@@ -282,9 +285,6 @@ window.addEventListener("keyup", function (e) {
   }
 });
 
-let player = JSON.parse(JSON.stringify(PLAYER));
-let GAME_OBJECTS = [player];
-
 const resetGame = () => {
   GAME_OBJECTS.length = 0;
 
@@ -357,28 +357,37 @@ const update = (dt) => {
     });
 
     // block group
-    blocks.forEach((ball) => {
-      ball.prev_x = ball.x;
-      ball.prev_y = ball.y;
+    blocks.forEach((block) => {
+      block.prev_x = block.x;
+      block.prev_y = block.y;
 
-      ball.positions.push({ x: ball.prev_x, y: ball.prev_y });
-      if (ball.positions.length > Math.floor(ball.top_speed * 10)) {
-        ball.positions.shift();
-      }
+      // block.positions.push({ x: block.prev_x, y: block.prev_y });
+      // if (block.positions.length > Math.floor(block.top_speed * 10)) {
+      //   block.positions.shift();
+      // }
 
-      ball.x += ball.dx * ball.speed;
-      ball.y += ball.dy * ball.speed;
+      block.speed = 1;
+      block.x += block.dx * block.speed;
+      block.y += block.dy * block.speed;
 
       // wall collision
-      if (ball.x + ball.w > GAME_W || ball.x + ball.w < 0) {
-        ball.dx *= -1;
+      if (block.x + block.w > GAME_W || block.x + block.w < 0) {
+        block.dx *= -1;
       }
-      if (ball.y + ball.w > GAME_H || ball.y + ball.w < 0) {
-        ball.dy *= -1;
+      if (block.y + block.w > GAME_H || block.y + block.w < 0) {
+        block.dy *= -1;
       }
 
-      ball.speed = easing(ball.speed, ball.top_speed);
+      // block.speed = easing(block.speed, block.top_speed);
     });
+
+    // spawning
+    let spawn_count = blocks.length;
+    spawn_timer++;
+    if (spawn_timer >= spawn_rate && spawn_count < spawn_limit) {
+      spawnBlock();
+      spawn_timer = 0;
+    }
 
     updateScreenshake();
 

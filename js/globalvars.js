@@ -13,3 +13,6 @@ var p1_bricks = 0;
 var p2_bricks = 0;
 var winner = "";
 var screenshakesRemaining = 0;
+var spawn_rate = 50;
+var spawn_timer = 0;
+var spawn_limit = 6;
