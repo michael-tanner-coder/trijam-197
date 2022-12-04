@@ -1,5 +1,4 @@
 // GAME CONCEPT: Space Invaders meets Asteriods! Shoot at falling blocks to split them into tinier blocks. Avoid them and keep shooting to score points.
-// TODO: shoot with spacebar
 // TODO: spawn falling blocks
 // TODO: split blocks when hit by a shot
 // TODO: destroy blocks at their smallest size
@@ -10,6 +9,7 @@
 // TODO: nice to have: start menu
 // TODO: nice to have: custom controls
 // TODO: nice to have: smooth vfx (screenshake, trails, particles)
+// TODO: nice to have: sound effects
 
 const GAME_W = 320;
 const GAME_H = 240;
@@ -45,6 +45,8 @@ const PLAYER = {
   speed: 4,
   type: "turret",
   tag: "player1",
+  shoot_rate: 18,
+  shoot_timer: 0,
 };
 const SHOT = {
   x: GAME_W / 2 - 4,
@@ -52,10 +54,10 @@ const SHOT = {
   w: 8,
   h: 8,
   dx: 0,
-  dy: 0,
+  dy: -3,
   color: RED,
   speed: 0.1,
-  type: "ball",
+  type: "shot",
   top_speed: 1,
   positions: [],
 };
@@ -83,6 +85,13 @@ PLAYER_1.y = 100;
 PLAYER_1.x = GAME_W / 2 - PLAYER_1.w / 2;
 
 // UTILS
+const shoot = (shooter, projectile) => {
+  let new_shot = JSON.parse(JSON.stringify(projectile));
+  new_shot.x = shooter.x + shooter.w / 2 - projectile.w / 2;
+  new_shot.y = shooter.y - shooter.h;
+  GAME_OBJECTS.push(new_shot);
+};
+
 const genGrid = (brick, rows, cols, start_x = 0, start_y = 0) => {
   let new_grid = [];
   for (let i = 0; i < rows; i++) {
@@ -110,34 +119,28 @@ function easingWithRate(x, target, rate, tolerance = 0) {
   return (x += (target - x) * rate);
 }
 
-const movePaddle = (paddle) => {
-  // P1
-  if (paddle.tag === "player1") {
-    INPUTS.ArrowRight
-      ? (paddle.dx = easingWithRate(paddle.dx, paddle.speed, 0.2))
-      : null;
-    INPUTS.ArrowLeft
-      ? (paddle.dx = easingWithRate(paddle.dx, -1 * paddle.speed, 0.2))
-      : null;
+const move = (object) => {
+  // ARROWS
+  INPUTS.ArrowRight
+    ? (object.dx = easingWithRate(object.dx, object.speed, 0.2))
+    : null;
+  INPUTS.ArrowLeft
+    ? (object.dx = easingWithRate(object.dx, -1 * object.speed, 0.2))
+    : null;
 
-    if (!INPUTS.ArrowRight && !INPUTS.ArrowLeft) {
-      paddle.dx = easingWithRate(paddle.dx, 0, 0.2);
-    }
+  if (!INPUTS.ArrowRight && !INPUTS.ArrowLeft) {
+    object.dx = easingWithRate(object.dx, 0, 0.2);
   }
 
-  // P2
-  if (paddle.tag === "player2") {
-    INPUTS.d
-      ? (paddle.dx = easingWithRate(paddle.dx, paddle.speed, 0.2))
-      : null;
-    INPUTS.a
-      ? (paddle.dx = easingWithRate(paddle.dx, -1 * paddle.speed, 0.2))
-      : null;
+  // A/D
+  // INPUTS.d ? (object.dx = easingWithRate(object.dx, object.speed, 0.2)) : null;
+  // INPUTS.a
+  //   ? (object.dx = easingWithRate(object.dx, -1 * object.speed, 0.2))
+  //   : null;
 
-    if (!INPUTS.d && !INPUTS.a) {
-      paddle.dx = easingWithRate(paddle.dx, 0, 0.2);
-    }
-  }
+  // if (!INPUTS.d && !INPUTS.a) {
+  //   object.dx = easingWithRate(object.dx, 0, 0.2);
+  // }
 };
 
 const pickDirection = (obj) => {
@@ -256,13 +259,14 @@ function updateScreenshake() {
 
 // INPUTS
 const INPUTS = {
-  // PLAYER 1
+  // MOVE
   ArrowLeft: false,
   ArrowRight: false,
-
-  // PLAYER 2
   a: false,
   d: false,
+
+  // SHOOT
+  [" "]: false,
 
   // PAUSE/START/QUIT
   Enter: false,
@@ -320,22 +324,36 @@ const update = (dt) => {
   }
   if (game_state === STATES.in_game) {
     // player group
-    turret.forEach((paddle) => {
+    turret.forEach((turret) => {
       // PLAYER MOVEMENT
-      paddle.prev_x = paddle.x;
+      turret.prev_x = turret.x;
 
-      movePaddle(paddle);
+      move(turret);
 
-      paddle.x += paddle.dx;
+      if (INPUTS[" "] && turret.shoot_timer === 0) {
+        shoot(turret, SHOT);
+        turret.shoot_timer += 1;
+      }
 
-      if (paddle.x <= 0) paddle.x = paddle.prev_x;
-      if (paddle.x + paddle.w >= GAME_W) paddle.x = paddle.prev_x;
+      if (turret.shoot_timer > 0) {
+        turret.shoot_timer += 1;
+      }
+
+      if (turret.shoot_timer >= turret.shoot_rate) {
+        turret.shoot_timer = 0;
+      }
+
+      turret.x += turret.dx;
+
+      if (turret.x <= 0) turret.x = turret.prev_x;
+      if (turret.x + turret.w >= GAME_W) turret.x = turret.prev_x;
     });
 
     // shot groups
     shots.forEach((shot) => {
       shot.prev_x = shot.x;
       shot.prev_y = shot.y;
+      shot.y += shot.dy;
     });
 
     // block group
