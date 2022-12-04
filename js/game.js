@@ -1,5 +1,4 @@
 // GAME CONCEPT: Space Invaders meets Asteriods! Shoot at falling blocks to split them into tinier blocks. Avoid them and keep shooting to score points.
-// TODO: move character left and right
 // TODO: shoot with spacebar
 // TODO: spawn falling blocks
 // TODO: split blocks when hit by a shot
@@ -33,10 +32,15 @@ const PADDING = 4;
 // OBJECTS
 const PLAYER = {
   x: GAME_W / 2,
-  y: GAME_H / 2,
+  y: GAME_H - 32,
   dx: 0,
-  w: 48,
-  h: 8,
+  w: 32,
+  h: 16,
+  turret_h: 8,
+  turret_w: 8,
+  turret_x: 12,
+  turret_y: -8,
+  turret_color: ORANGE,
   color: ORANGE,
   speed: 4,
   type: "turret",
@@ -274,8 +278,8 @@ window.addEventListener("keyup", function (e) {
   }
 });
 
-pickDirection(SHOT);
-let GAME_OBJECTS = [];
+let player = JSON.parse(JSON.stringify(PLAYER));
+let GAME_OBJECTS = [player];
 
 const resetGame = () => {
   GAME_OBJECTS.length = 0;
@@ -326,19 +330,12 @@ const update = (dt) => {
 
       if (paddle.x <= 0) paddle.x = paddle.prev_x;
       if (paddle.x + paddle.w >= GAME_W) paddle.x = paddle.prev_x;
-
-      if (collisionDetected(SHOT, paddle)) {
-        bounceBall(SHOT, paddle);
-      }
     });
 
     // shot groups
-    shots.forEach((brick) => {
-      brick.prev_x = brick.x;
-      brick.prev_y = brick.y;
-      if (collisionDetected(SHOT, brick)) {
-        bounceBall(SHOT, brick);
-      }
+    shots.forEach((shot) => {
+      shot.prev_x = shot.x;
+      shot.prev_y = shot.y;
     });
 
     // block group
@@ -380,12 +377,22 @@ const update = (dt) => {
 
 const draw = () => {
   context.fillStyle = "black";
-  context.fillRect(0, 0, canvas.width, canvas.height / 2);
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
   // render objects
   GAME_OBJECTS.forEach((obj) => {
     context.fillStyle = obj.color;
     context.fillRect(obj.x, obj.y, obj.w, obj.h);
+
+    if (obj.type === "turret") {
+      context.fillStyle = obj.turret_color;
+      context.fillRect(
+        obj.x + obj.turret_x,
+        obj.y + obj.turret_y,
+        obj.turret_w,
+        obj.turret_h
+      );
+    }
   });
 
   // timer
