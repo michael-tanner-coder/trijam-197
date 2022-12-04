@@ -1,5 +1,4 @@
 // GAME CONCEPT: Space Invaders meets Asteriods! Shoot at falling blocks to split them into tinier blocks. Avoid them and keep shooting to score points.
-// TODO: add score for shooting blocks
 // TODO: hurt player when hitting a block
 // TODO: game over + reset + show score
 // TODO: lead-in startup timer
@@ -93,6 +92,7 @@ const spawnBlock = () => {
 };
 
 const splitBlock = (block) => {
+  // make 2 new blocks
   let left_block = JSON.parse(JSON.stringify(block));
   let right_block = JSON.parse(JSON.stringify(block));
 
@@ -380,7 +380,14 @@ const update = (dt) => {
 
       blocks.forEach((block) => {
         if (collisionDetected(shot, block)) {
+          // update score based on the split block's width
+          let points = 32 / block.w;
+          score += points;
+
+          // split the block into 2 new blocks
           splitBlock(block);
+
+          // remove the shot that hit the block
           let index = GAME_OBJECTS.indexOf(shot);
           GAME_OBJECTS.splice(index, 1);
         }
@@ -476,6 +483,7 @@ const draw = () => {
 
   // HUD
   context.fillStyle = "white";
+  context.fillText(score, 12, 16);
 };
 
 const loop = () => {

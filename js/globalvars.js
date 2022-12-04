@@ -16,3 +16,4 @@ var screenshakesRemaining = 0;
 var spawn_rate = 50;
 var spawn_timer = 0;
 var spawn_limit = 6;
+var score = 0;
