@@ -39,7 +39,6 @@ const PLAYER = {
   color: ORANGE,
   speed: 4,
   type: "turret",
-  tag: "player1",
   shoot_rate: 18,
   shoot_timer: 0,
   heart: {
@@ -49,7 +48,10 @@ const PLAYER = {
     w: 8,
     h: 8,
   },
+  positions: [],
+  has_trail: true,
 };
+
 const SHOT = {
   x: GAME_W / 2 - 4,
   y: GAME_H / 2 - 4,
@@ -62,7 +64,9 @@ const SHOT = {
   type: "shot",
   top_speed: 1,
   positions: [],
+  has_trail: true,
 };
+
 const BLOCK = {
   x: GAME_W / 2,
   y: 50,
@@ -75,7 +79,8 @@ const BLOCK = {
   color: YELLOW,
   speed: 0,
   type: "block",
-  tag: "player1",
+  positions: [],
+  has_trail: false,
 };
 
 // PLAYERS
@@ -249,6 +254,14 @@ function clamp(num, min, max) {
   return num;
 }
 
+function trackPosition(object) {
+  let pos = { x: object.prev_x, y: object.prev_y };
+  object.positions.push(pos);
+  if (object.positions.length > 10) {
+    object.positions.shift();
+  }
+}
+
 function drawTrail(positions, obj) {
   positions?.forEach((pos, i) => {
     // ratio that moves toward one as we reach the end of the trail
@@ -365,6 +378,8 @@ const update = (dt) => {
 
     // player group
     turrets.forEach((turret) => {
+      trackPosition(turret);
+
       // PLAYER MOVEMENT
       turret.prev_x = turret.x;
 
@@ -421,6 +436,8 @@ const update = (dt) => {
 
     // shot groups
     shots.forEach((shot) => {
+      trackPosition(shot);
+
       shot.prev_x = shot.x;
       shot.prev_y = shot.y;
       shot.y += shot.dy;
@@ -443,6 +460,8 @@ const update = (dt) => {
 
     // block group
     blocks.forEach((block) => {
+      trackPosition(block);
+
       block.prev_x = block.x;
       block.prev_y = block.y;
 
@@ -497,9 +516,16 @@ const draw = () => {
 
   // render objects
   GAME_OBJECTS.forEach((obj) => {
+    // render trail underneath objects
+    if (obj.has_trail) {
+      drawTrail(obj.positions, obj);
+    }
+
+    // render object
     context.fillStyle = obj.color;
     context.fillRect(obj.x, obj.y, obj.w, obj.h);
 
+    // turret-specific rendering
     if (obj.type === "turret") {
       // i frame flash
       if (i_frames > 0) {
