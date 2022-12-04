@@ -1,7 +1,10 @@
-// GAME CONCEPT: Space Invaders meets Asteriods! Shoot at falling blocks to split them into tinier blocks. Avoid them and keep shooting to score points.
+// GAME CONCEPT: Space Invaders meets Asteriods!
+// Shoot at falling blocks to split them into tinier blocks.
+// Avoid them and keep shooting to score points.
+// If you get hit, you split into tiny turrets! Neat!
+
 // TODO: nice to have: start menu
 // TODO: nice to have: custom controls
-// TODO: nice to have: smooth vfx (screenshake, trails, particles)
 // TODO: nice to have: sound effects
 
 const GAME_W = 320;
@@ -93,6 +96,8 @@ const shoot = (shooter, projectile) => {
   new_shot.x = shooter.x + shooter.w / 2 - projectile.w / 2;
   new_shot.y = shooter.y - shooter.h;
   GAME_OBJECTS.push(new_shot);
+
+  playSound(SOUNDS["shoot"]);
 };
 
 const spawnBlock = () => {

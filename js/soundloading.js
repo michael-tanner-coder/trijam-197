@@ -1,10 +1,12 @@
+var sound_loading_error = false;
+
 const SOUNDS = {}; // GLOBAL SOUND ARRAY: DON'T EDIT
 const soundList = [
   // MUSIC
   // Add your music asset here ^
   //   { file: "mysong.wav", name: "mysong" },
   // SFX
-  //   { file: "mysound.wav", name: "mysound" },
+  { file: "shoot.wav", name: "shoot" },
   // Add your sound asset here ^
 ];
 
@@ -26,10 +28,7 @@ async function loadSounds(sound_object) {
 
   // Check for any errors in loading sound assets
   for (let i = 0; i < soundList.length; i++) {
-    if (
-      !soundList[i] ||
-      checkForNamingCollisions(soundList, soundList[i].name, ASSET_TYPES.SOUND)
-    ) {
+    if (!soundList[i]) {
       break;
     }
 
