@@ -31,7 +31,7 @@ const ROWS = 4;
 const PADDING = 4;
 
 // OBJECTS
-const PADDLE = {
+const PLAYER = {
   x: GAME_W / 2,
   y: GAME_H / 2,
   dx: 0,
@@ -39,10 +39,10 @@ const PADDLE = {
   h: 8,
   color: ORANGE,
   speed: 4,
-  type: "paddle",
+  type: "turret",
   tag: "player1",
 };
-const BALL = {
+const SHOT = {
   x: GAME_W / 2 - 4,
   y: GAME_H / 2 - 4,
   w: 8,
@@ -55,7 +55,7 @@ const BALL = {
   top_speed: 1,
   positions: [],
 };
-const BRICK = {
+const BLOCK = {
   x: GAME_W / 2,
   y: 50,
   dx: 0,
@@ -66,22 +66,17 @@ const BRICK = {
   h: BRICK_H,
   color: YELLOW,
   speed: 0,
-  type: "brick",
+  type: "block",
   tag: "player1",
 };
 
 // PLAYERS
-const PLAYER_1 = JSON.parse(JSON.stringify(PADDLE));
-const PLAYER_2 = JSON.parse(JSON.stringify(PADDLE));
+const PLAYER_1 = JSON.parse(JSON.stringify(PLAYER));
 PLAYER_1.tag = "player1";
-PLAYER_2.tag = "player2";
-PLAYER_2.color = MID_PURPLE;
 
 PLAYER_1.y = 100;
-PLAYER_2.y = 200 + PLAYER_2.h;
 
 PLAYER_1.x = GAME_W / 2 - PLAYER_1.w / 2;
-PLAYER_2.x = GAME_W / 2 - PLAYER_1.w / 2;
 
 // UTILS
 const genGrid = (brick, rows, cols, start_x = 0, start_y = 0) => {
@@ -198,10 +193,6 @@ const bounceBall = (ball, other) => {
     false
   );
   screenshakesRemaining = HIT_SCREENSHAKES;
-
-  // reduce brick count
-  if (other.tag === "player1" && other.type === "brick") p1_bricks--;
-  if (other.tag === "player2" && other.type === "brick") p2_bricks--;
 };
 
 function collisionDetected(obj_a, obj_b) {
@@ -211,18 +202,6 @@ function collisionDetected(obj_a, obj_b) {
     obj_a.y < obj_b.y + obj_b.h &&
     obj_a.y + obj_a.h > obj_b.y
   );
-}
-
-function checkForWinner() {
-  if (p1_bricks <= 0) {
-    winner = "P2 WINS";
-    game_state = STATES.game_over;
-  }
-
-  if (p2_bricks <= 0) {
-    winner = "P1 WINS";
-    game_state = STATES.game_over;
-  }
 }
 
 function clamp(num, min, max) {
@@ -295,16 +274,7 @@ window.addEventListener("keyup", function (e) {
   }
 });
 
-const PLAYER_1_GRID = genGrid(BRICK, ROWS, COLS, BRICK_W / 2, BRICK_H);
-const PLAYER_2_GRID = genGrid(BRICK, ROWS, COLS, BRICK_W / 2, 224);
-PLAYER_2_GRID.forEach((brick) => {
-  brick.tag = "player2";
-  brick.color = PURPLE;
-});
-p1_bricks = PLAYER_1_GRID.length;
-p2_bricks = PLAYER_2_GRID.length;
-
-pickDirection(BALL);
+pickDirection(SHOT);
 let GAME_OBJECTS = [];
 
 const resetGame = () => {
@@ -357,8 +327,8 @@ const update = (dt) => {
       if (paddle.x <= 0) paddle.x = paddle.prev_x;
       if (paddle.x + paddle.w >= GAME_W) paddle.x = paddle.prev_x;
 
-      if (collisionDetected(BALL, paddle)) {
-        bounceBall(BALL, paddle);
+      if (collisionDetected(SHOT, paddle)) {
+        bounceBall(SHOT, paddle);
       }
     });
 
@@ -366,8 +336,8 @@ const update = (dt) => {
     shots.forEach((brick) => {
       brick.prev_x = brick.x;
       brick.prev_y = brick.y;
-      if (collisionDetected(BALL, brick)) {
-        bounceBall(BALL, brick);
+      if (collisionDetected(SHOT, brick)) {
+        bounceBall(SHOT, brick);
       }
     });
 
@@ -396,8 +366,6 @@ const update = (dt) => {
     });
 
     updateScreenshake();
-
-    checkForWinner();
 
     return;
   }
