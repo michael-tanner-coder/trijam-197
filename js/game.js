@@ -29,17 +29,26 @@ const PLAYER = {
   dx: 0,
   w: 32,
   h: 16,
-  turret_h: 8,
-  turret_w: 8,
-  turret_x: 12,
-  turret_y: -8,
-  turret_color: ORANGE,
+  cannon: {
+    h: 8,
+    w: 8,
+    x: 12,
+    y: -8,
+    color: ORANGE,
+  },
   color: ORANGE,
   speed: 4,
   type: "turret",
   tag: "player1",
   shoot_rate: 18,
   shoot_timer: 0,
+  heart: {
+    color: "pink",
+    x: 12,
+    y: 2,
+    w: 8,
+    h: 8,
+  },
 };
 const SHOT = {
   x: GAME_W / 2 - 4,
@@ -88,30 +97,30 @@ const spawnBlock = () => {
   GAME_OBJECTS.push(new_block);
 };
 
-const splitBlock = (block) => {
-  // make 2 new blocks
-  let left_block = JSON.parse(JSON.stringify(block));
-  let right_block = JSON.parse(JSON.stringify(block));
+const split = (object) => {
+  // make 2 new objects
+  let left_object = JSON.parse(JSON.stringify(object));
+  let right_object = JSON.parse(JSON.stringify(object));
 
   // dimensions
-  left_block.w = block.w / 2;
-  right_block.w = block.w / 2;
+  left_object.w = object.w / 2;
+  right_object.w = object.w / 2;
 
   // position
-  right_block.x = block.x + block.w / 2;
+  right_object.x = object.x + object.w / 2;
 
   // direction
-  left_block.dx = -1;
-  right_block.dx = 1;
+  left_object.dx = -1;
+  right_object.dx = 1;
 
-  // remove original block
-  let index = GAME_OBJECTS.indexOf(block);
+  // remove original object
+  let index = GAME_OBJECTS.indexOf(object);
   GAME_OBJECTS.splice(index, 1);
 
-  // spawn new blocks
-  if (left_block.w > 2 && right_block.w > 2) {
-    GAME_OBJECTS.push(left_block);
-    GAME_OBJECTS.push(right_block);
+  // spawn new objects
+  if (left_object.w > 4 && right_object.w > 4) {
+    GAME_OBJECTS.push(left_object);
+    GAME_OBJECTS.push(right_object);
   }
 };
 
@@ -370,11 +379,17 @@ const update = (dt) => {
       if (turret.x <= 0) turret.x = turret.prev_x;
       if (turret.x + turret.w >= GAME_W) turret.x = turret.prev_x;
 
+      turret.heart.x = turret.x + 12;
+      turret.heart.y = turret.y + 2;
+
+      turret.cannon.w = turret.w / 4;
+      turret.cannon.x = turret.w / 2 - turret.cannon.w / 2;
+
       // collision against blocks
       blocks.forEach((block) => {
-        if (collisionDetected(turret, block)) {
-          game_state = "game_over";
-          GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(turret), 1);
+        if (collisionDetected(turret.heart, block)) {
+          // game_state = "game_over";
+          // GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(turret), 1);
           poof(
             turret.x + turret.w / 2,
             turret.y + turret.h - turret.h / 4,
@@ -382,6 +397,8 @@ const update = (dt) => {
             1,
             false
           );
+          GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(block), 1);
+          split(turret);
         }
       });
     });
@@ -399,7 +416,7 @@ const update = (dt) => {
           score += points;
 
           // split the block into 2 new blocks
-          splitBlock(block);
+          split(block);
 
           // remove the shot that hit the block
           let index = GAME_OBJECTS.indexOf(shot);
@@ -443,6 +460,10 @@ const update = (dt) => {
 
     updateScreenshake();
 
+    if (turrets.length < 1) {
+      game_state = "game_over";
+    }
+
     return;
   }
   if (game_state === STATES.game_over) {
@@ -464,12 +485,13 @@ const draw = () => {
     context.fillRect(obj.x, obj.y, obj.w, obj.h);
 
     if (obj.type === "turret") {
-      context.fillStyle = obj.turret_color;
+      // gun
+      context.fillStyle = obj.cannon.color;
       context.fillRect(
-        obj.x + obj.turret_x,
-        obj.y + obj.turret_y,
-        obj.turret_w,
-        obj.turret_h
+        obj.x + obj.cannon.x,
+        obj.y + obj.cannon.y,
+        obj.cannon.w,
+        obj.cannon.h
       );
     }
   });
