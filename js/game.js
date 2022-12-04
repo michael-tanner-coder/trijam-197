@@ -1,7 +1,4 @@
 // GAME CONCEPT: Space Invaders meets Asteriods! Shoot at falling blocks to split them into tinier blocks. Avoid them and keep shooting to score points.
-// TODO: spawn falling blocks
-// TODO: split blocks when hit by a shot
-// TODO: destroy blocks at their smallest size
 // TODO: add score for shooting blocks
 // TODO: hurt player when hitting a block
 // TODO: game over + reset + show score
@@ -93,6 +90,32 @@ const spawnBlock = () => {
   new_block.x = Math.floor(Math.random() * GAME_W);
   new_block.y = 0;
   GAME_OBJECTS.push(new_block);
+};
+
+const splitBlock = (block) => {
+  let left_block = JSON.parse(JSON.stringify(block));
+  let right_block = JSON.parse(JSON.stringify(block));
+
+  // dimensions
+  left_block.w = block.w / 2;
+  right_block.w = block.w / 2;
+
+  // position
+  right_block.x = block.x + block.w / 2;
+
+  // direction
+  left_block.dx = -1;
+  right_block.dx = 1;
+
+  // remove original block
+  let index = GAME_OBJECTS.indexOf(block);
+  GAME_OBJECTS.splice(index, 1);
+
+  // spawn new blocks
+  if (left_block.w > 2 && right_block.w > 2) {
+    GAME_OBJECTS.push(left_block);
+    GAME_OBJECTS.push(right_block);
+  }
 };
 
 const genGrid = (brick, rows, cols, start_x = 0, start_y = 0) => {
@@ -354,6 +377,14 @@ const update = (dt) => {
       shot.prev_x = shot.x;
       shot.prev_y = shot.y;
       shot.y += shot.dy;
+
+      blocks.forEach((block) => {
+        if (collisionDetected(shot, block)) {
+          splitBlock(block);
+          let index = GAME_OBJECTS.indexOf(shot);
+          GAME_OBJECTS.splice(index, 1);
+        }
+      });
     });
 
     // block group
