@@ -320,7 +320,7 @@ const resetGame = () => {
 // LOOP
 const update = (dt) => {
   // collision groups
-  let turret = GAME_OBJECTS.filter((obj) => obj.type === "turret");
+  let turrets = GAME_OBJECTS.filter((obj) => obj.type === "turret");
   let blocks = GAME_OBJECTS.filter((obj) => obj.type === "block");
   let shots = GAME_OBJECTS.filter((obj) => obj.type === "shot");
 
@@ -347,7 +347,7 @@ const update = (dt) => {
   }
   if (game_state === STATES.in_game) {
     // player group
-    turret.forEach((turret) => {
+    turrets.forEach((turret) => {
       // PLAYER MOVEMENT
       turret.prev_x = turret.x;
 
@@ -370,6 +370,21 @@ const update = (dt) => {
 
       if (turret.x <= 0) turret.x = turret.prev_x;
       if (turret.x + turret.w >= GAME_W) turret.x = turret.prev_x;
+
+      // collision against blocks
+      blocks.forEach((block) => {
+        if (collisionDetected(turret, block)) {
+          game_state = "game_over";
+          GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(turret), 1);
+          poof(
+            turret.x + turret.w / 2,
+            turret.y + turret.h - turret.h / 4,
+            turret.color,
+            1,
+            false
+          );
+        }
+      });
     });
 
     // shot groups
@@ -467,6 +482,10 @@ const draw = () => {
   }
 
   if (game_state === STATES.game_over) {
+    context.fillStyle = "white";
+    let game_over_text = "GAME OVER!";
+    let game_over_w = context.measureText(game_over_text).width;
+    context.fillText(game_over_text, GAME_W / 2 - game_over_w / 2, GAME_H / 2);
   }
 
   if (game_state === STATES.menu) {
