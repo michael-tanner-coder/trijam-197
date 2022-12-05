@@ -7,6 +7,12 @@
 // TODO: nice to have: custom controls
 // TODO: nice to have: sound effects
 
+// TODO: prevent turrets from moving into each other
+// TODO: push turret a little farther upward
+// TODO: prevent player from auto-firing
+// TODO: prevent blocks from spawning out of bounds
+// TODO: scale difficulty over time
+
 const GAME_W = 320;
 const GAME_H = 240;
 
@@ -28,7 +34,7 @@ const PADDING = 4;
 // OBJECTS
 const PLAYER = {
   x: GAME_W / 2 - 16,
-  y: GAME_H - 32,
+  y: GAME_H - 48,
   dx: 0,
   w: 32,
   h: 16,
@@ -97,7 +103,7 @@ const shoot = (shooter, projectile) => {
   new_shot.y = shooter.y - shooter.h;
   GAME_OBJECTS.push(new_shot);
 
-  playSound(SOUNDS["shoot"]);
+  // playSound(SOUNDS["shoot"]);
 };
 
 const spawnBlock = () => {
@@ -126,6 +132,8 @@ const split = (object) => {
   // remove original object
   let index = GAME_OBJECTS.indexOf(object);
   GAME_OBJECTS.splice(index, 1);
+
+  poof(object.x, object.y, object.color, 1, false);
 
   // spawn new objects
   if (left_object.w > 4 && right_object.w > 4) {
@@ -408,7 +416,10 @@ const update = (dt) => {
       if (turret.x <= 0) turret.x = turret.prev_x;
       if (turret.x + turret.w >= GAME_W) turret.x = turret.prev_x;
 
-      turret.heart.x = turret.x + 12;
+      // turret hitboxes
+      turret.heart.w = turret.w / 4;
+
+      turret.heart.x = turret.x + turret.w / 2 - turret.heart.w / 2;
       turret.heart.y = turret.y + 2;
 
       turret.cannon.w = turret.w / 4;
@@ -536,6 +547,10 @@ const draw = () => {
       if (i_frames > 0) {
         obj.color = i_frames % 2 === 0 ? "white" : ORANGE;
       }
+
+      // heart
+      context.fillStyle = obj.heart.color;
+      context.fillRect(obj.heart.x, obj.heart.y, obj.heart.w, obj.heart.h);
 
       // gun
       context.fillStyle = obj.cannon.color;
