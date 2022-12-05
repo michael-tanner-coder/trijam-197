@@ -65,12 +65,13 @@ const SHOT = {
   h: 8,
   dx: 0,
   dy: -3,
-  color: RED,
+  color: GREEN,
   speed: 0.1,
   type: "shot",
   top_speed: 1,
   positions: [],
   has_trail: true,
+  health: 3,
 };
 
 const BLOCK = {
@@ -105,6 +106,12 @@ const shoot = (shooter, projectile) => {
 
 const spawnBlock = () => {
   let new_block = JSON.parse(JSON.stringify(BLOCK));
+
+  if (score > 200) {
+    new_block.w = 64;
+    new_block.h = 16;
+  }
+
   new_block.x = Math.floor(Math.random() * GAME_W - BLOCK_W);
   if (new_block.x < 0) new_block.x += BLOCK_W;
   new_block.y = 0;
@@ -515,6 +522,21 @@ const update = (dt) => {
       }
       if (shot.y + shot.w > GAME_H || shot.y + shot.w < 0) {
         shot.dy *= -1;
+        shot.health -= 1;
+      }
+
+      // health coloring
+      if (shot.health === 3) {
+        shot.color = GREEN;
+      } else if (shot.health === 2) {
+        shot.color = YELLOW;
+      } else if (shot.health === 1) {
+        shot.color = RED;
+      }
+
+      // health check
+      if (shot.health <= 0) {
+        shot.remove = true;
       }
     });
 
@@ -558,6 +580,7 @@ const update = (dt) => {
     // despawning
     GAME_OBJECTS.forEach((obj) => {
       if (obj.remove) {
+        poof(obj.x + obj.w / 2, obj.y + obj.h / 2, obj.color, 1, false);
         let idx = GAME_OBJECTS.indexOf(obj);
         GAME_OBJECTS.splice(idx, 1);
       }
