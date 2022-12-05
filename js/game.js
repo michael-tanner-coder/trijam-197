@@ -39,15 +39,15 @@ const PLAYER = {
     w: 8,
     x: 12,
     y: -8,
-    color: ORANGE,
+    color: MID_PURPLE,
   },
-  color: ORANGE,
+  color: MID_PURPLE,
   speed: 4,
   type: "turret",
   shoot_rate: 18,
   shoot_timer: 0,
   heart: {
-    color: "pink",
+    color: MID_PURPLE,
     x: GAME_W / 2 - 16,
     y: GAME_H - 48,
     w: 8,
@@ -602,7 +602,7 @@ const update = (dt) => {
 };
 
 const draw = () => {
-  context.fillStyle = "black";
+  context.fillStyle = AQUAMARINE;
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   // render objects
@@ -620,12 +620,12 @@ const draw = () => {
     if (obj.type === "turret") {
       // i frame flash
       if (i_frames > 0) {
-        obj.color = i_frames % 2 === 0 ? "white" : ORANGE;
+        obj.color = i_frames % 2 === 0 ? "white" : MID_PURPLE;
       }
 
       // heart
-      context.fillStyle = obj.heart.color;
-      context.fillRect(obj.heart.x, obj.heart.y, obj.heart.w, obj.heart.h);
+      // context.fillStyle = obj.heart.color;
+      // context.fillRect(obj.heart.x, obj.heart.y, obj.heart.w, obj.heart.h);
 
       // gun
       context.fillStyle = obj.cannon.color;
@@ -650,7 +650,7 @@ const draw = () => {
     let game_over_w = context.measureText(game_over_text).width;
     context.fillText(game_over_text, GAME_W / 2 - game_over_w / 2, GAME_H / 2);
 
-    let score_text = "SCORE:" + score;
+    let score_text = "SCORE:" + score.toFixed(0);
     let score_text_w = context.measureText(score_text).width;
     context.fillText(
       score_text,
