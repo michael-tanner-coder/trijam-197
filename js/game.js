@@ -8,9 +8,7 @@
 // TODO: nice to have: sound effects
 
 // TODO: prevent turrets from moving into each other
-// TODO: push turret a little farther upward
 // TODO: prevent player from auto-firing
-// TODO: prevent blocks from spawning out of bounds
 // TODO: scale difficulty over time
 
 const GAME_W = 320;
@@ -25,8 +23,8 @@ const STATES = {
 var game_state = "start";
 
 // GRID PROPS
-const BRICK_W = 32;
-const BRICK_H = 16;
+const BLOCK_W = 32;
+const BLOCK_H = 16;
 const COLS = 6;
 const ROWS = 4;
 const PADDING = 4;
@@ -83,8 +81,8 @@ const BLOCK = {
   dy: 1,
   prev_x: 0,
   prev_y: 0,
-  w: BRICK_W,
-  h: BRICK_H,
+  w: BLOCK_W,
+  h: BLOCK_H,
   color: YELLOW,
   speed: 0,
   type: "block",
@@ -108,7 +106,8 @@ const shoot = (shooter, projectile) => {
 
 const spawnBlock = () => {
   let new_block = JSON.parse(JSON.stringify(BLOCK));
-  new_block.x = Math.floor(Math.random() * GAME_W);
+  new_block.x = Math.floor(Math.random() * GAME_W - BLOCK_W);
+  if (new_block.x < 0) new_block.x += BLOCK_W;
   new_block.y = 0;
   GAME_OBJECTS.push(new_block);
 };
