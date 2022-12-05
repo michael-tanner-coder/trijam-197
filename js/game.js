@@ -7,8 +7,6 @@
 // TODO: nice to have: custom controls
 // TODO: nice to have: sound effects
 
-// TODO: scale difficulty over time
-
 const GAME_W = 320;
 const GAME_H = 240;
 
@@ -109,6 +107,11 @@ const spawnBlock = () => {
 
   if (score > 200) {
     new_block.w = 64;
+    new_block.h = 16;
+  }
+
+  if (score > 400) {
+    new_block.w = 128;
     new_block.h = 16;
   }
 
