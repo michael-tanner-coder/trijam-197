@@ -7,7 +7,6 @@
 // TODO: nice to have: custom controls
 // TODO: nice to have: sound effects
 
-// TODO: prevent turrets from moving into each other
 // TODO: prevent player from auto-firing
 // TODO: scale difficulty over time
 
@@ -50,13 +49,14 @@ const PLAYER = {
   shoot_timer: 0,
   heart: {
     color: "pink",
-    x: 12,
-    y: 2,
+    x: GAME_W / 2 - 16,
+    y: GAME_H - 48,
     w: 8,
     h: 8,
   },
   positions: [],
   has_trail: true,
+  buffer: 4,
 };
 
 const SHOT = {
@@ -411,6 +411,13 @@ const update = (dt) => {
       }
 
       turret.x += turret.dx;
+
+      turrets.forEach((other_turret) => {
+        if (other_turret === turret) return;
+        if (collisionDetected(turret, other_turret)) {
+          turret.x = turret.prev_x;
+        }
+      });
 
       if (turret.x <= 0) turret.x = turret.prev_x;
       if (turret.x + turret.w >= GAME_W) turret.x = turret.prev_x;
