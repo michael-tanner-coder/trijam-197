@@ -16,7 +16,7 @@ const STATES = {
   in_game: "in_game",
   menu: "menu",
 };
-var game_state = "start";
+var game_state = "menu";
 
 // GRID PROPS
 const BLOCK_W = 32;
@@ -110,10 +110,10 @@ const spawnBlock = () => {
     new_block.h = 16;
   }
 
-  if (score > 400) {
-    new_block.w = 128;
-    new_block.h = 16;
-  }
+  // if (score > 400) {
+  //   new_block.w = 128;
+  //   new_block.h = 16;
+  // }
 
   new_block.x = Math.floor(Math.random() * GAME_W - BLOCK_W);
   if (new_block.x < 0) new_block.x += BLOCK_W;
@@ -665,10 +665,24 @@ const draw = () => {
   if (game_state === STATES.menu) {
     context.fillStyle = "white";
 
-    let p2_text = "MOVE WITH LEFT / RIGHT";
-    let p2_text_width = context.measureText(p2_text).width;
+    let move_text = "MOVE WITH LEFT / RIGHT KEYS";
+    let shoot_text = "SHOOT WITH SPACEBAR";
+    let start_text = "PRESS ENTER TO START";
+    let move_text_width = context.measureText(move_text).width;
+    let shoot_text_width = context.measureText(shoot_text).width;
+    let start_text_width = context.measureText(start_text).width;
     context.fillStyle = "white";
-    // context.fillText(p2_text, GAME_W / 2 - p2_text_width / 2, GAME_H / 2 + 16);
+    context.fillText(move_text, GAME_W / 2 - move_text_width / 2, GAME_H / 2);
+    context.fillText(
+      shoot_text,
+      GAME_W / 2 - shoot_text_width / 2,
+      GAME_H / 2 + 16
+    );
+    context.fillText(
+      start_text,
+      GAME_W / 2 - start_text_width / 2,
+      GAME_H / 2 + 48
+    );
   }
 
   // fx
