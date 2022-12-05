@@ -7,7 +7,6 @@
 // TODO: nice to have: custom controls
 // TODO: nice to have: sound effects
 
-// TODO: prevent player from auto-firing
 // TODO: scale difficulty over time
 
 const GAME_W = 320;
@@ -454,6 +453,29 @@ const update = (dt) => {
           i_frames = invincibility_duration;
         }
       });
+
+      shots.forEach((shot) => {
+        if (collisionDetected(turret.heart, shot) && i_frames < 1) {
+          // particle effect and screen shake on turret destruction
+          poof(
+            turret.x + turret.w / 2,
+            turret.y + turret.h - turret.h / 4,
+            turret.color,
+            1,
+            false
+          );
+          screenshakesRemaining = HIT_SCREENSHAKES;
+
+          // remove shot that hit the player
+          GAME_OBJECTS.splice(GAME_OBJECTS.indexOf(shot), 1);
+
+          // split the player into smaller turrets
+          split(turret);
+
+          // give the player a span of invincibility frames
+          i_frames = invincibility_duration;
+        }
+      });
     });
 
     // shot groups
@@ -478,6 +500,22 @@ const update = (dt) => {
           GAME_OBJECTS.splice(index, 1);
         }
       });
+
+      shots.forEach((other_shot) => {
+        if (shot === other_shot) return;
+        if (collisionDetected(shot, other_shot)) {
+          shot.remove = true;
+          other_shot.remove = true;
+        }
+      });
+
+      // wall collision
+      if (shot.x + shot.w > GAME_W || shot.x + shot.w < 0) {
+        shot.dx *= -1;
+      }
+      if (shot.y + shot.w > GAME_H || shot.y + shot.w < 0) {
+        shot.dy *= -1;
+      }
     });
 
     // block group
@@ -516,6 +554,14 @@ const update = (dt) => {
     }
 
     updateScreenshake();
+
+    // despawning
+    GAME_OBJECTS.forEach((obj) => {
+      if (obj.remove) {
+        let idx = GAME_OBJECTS.indexOf(obj);
+        GAME_OBJECTS.splice(idx, 1);
+      }
+    });
 
     if (turrets.length < 1) {
       game_state = "game_over";
